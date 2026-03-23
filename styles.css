@@ -1,0 +1,1048 @@
+/* ===== Chronos Plugin Styles ===== */
+
+/* --- Task List View --- */
+.chronos-task-list-view {
+	padding: 0;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.chronos-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	flex-wrap: wrap;
+}
+
+.chronos-filter-row {
+	margin-left: auto;
+}
+
+.chronos-task-count {
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.chronos-btn {
+	padding: 4px 10px;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	color: var(--text-normal);
+	cursor: pointer;
+	font-size: 13px;
+}
+
+.chronos-btn:hover {
+	background: var(--background-modifier-hover);
+}
+
+.chronos-btn-primary {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	font-weight: 600;
+}
+
+.chronos-btn-primary:hover {
+	opacity: 0.9;
+}
+
+.chronos-btn-icon {
+	padding: 2px 6px;
+	border-radius: 4px;
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	font-size: 14px;
+}
+
+.chronos-btn-icon:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.chronos-zoom-label {
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+/* --- Empty state --- */
+.chronos-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 48px 16px;
+	text-align: center;
+}
+
+.chronos-empty-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--text-normal);
+	margin-bottom: 8px;
+}
+
+.chronos-empty-desc {
+	font-size: 13px;
+	color: var(--text-muted);
+}
+
+/* --- Task tree --- */
+.chronos-task-tree {
+	flex: 1;
+	overflow-y: auto;
+}
+
+.chronos-task-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+	border-bottom: 1px solid var(--background-modifier-border-focus);
+	transition: background 0.1s;
+	min-height: 36px;
+	cursor: grab;
+}
+
+.chronos-task-row:active {
+	cursor: grabbing;
+}
+
+.chronos-task-row:hover {
+	background: var(--background-modifier-hover);
+}
+
+.chronos-task-row.chronos-drop-target {
+	background: var(--interactive-accent-hover);
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: -2px;
+}
+
+.chronos-drag-handle {
+	cursor: grab;
+	color: var(--text-faint);
+	font-size: 14px;
+	user-select: none;
+	flex-shrink: 0;
+}
+
+.chronos-drag-handle:hover {
+	color: var(--text-muted);
+}
+
+/* --- Badges --- */
+.chronos-badge {
+	font-size: 10px;
+	font-weight: 700;
+	color: white;
+	padding: 1px 6px;
+	border-radius: 3px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	flex-shrink: 0;
+}
+
+/* --- Task title --- */
+.chronos-task-title {
+	flex: 1;
+	font-size: 13px;
+	color: var(--text-normal);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	min-width: 0;
+}
+
+/* --- Status --- */
+.chronos-status {
+	font-size: 11px;
+	padding: 2px 8px;
+	border-radius: 10px;
+	flex-shrink: 0;
+}
+
+.chronos-status-todo {
+	background: var(--background-modifier-border);
+	color: var(--text-muted);
+}
+
+.chronos-status-in-progress {
+	background: rgba(74, 158, 255, 0.2);
+	color: #4a9eff;
+}
+
+.chronos-status-done {
+	background: rgba(81, 207, 102, 0.2);
+	color: #51cf66;
+}
+
+/* --- Dates --- */
+.chronos-task-dates {
+	font-size: 11px;
+	color: var(--text-muted);
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+/* --- Mini progress bar --- */
+.chronos-progress-mini {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+	width: 80px;
+}
+
+.chronos-progress-mini-bar {
+	height: 4px;
+	border-radius: 2px;
+	transition: width 0.2s;
+	display: block;
+	flex: 1;
+	position: relative;
+}
+
+.chronos-progress-mini::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background: var(--background-modifier-border);
+	border-radius: 2px;
+}
+
+.chronos-progress-mini {
+	position: relative;
+	background: var(--background-modifier-border);
+	border-radius: 2px;
+	height: 4px;
+	width: 60px;
+	overflow: hidden;
+}
+
+.chronos-progress-mini-bar {
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 100%;
+}
+
+.chronos-progress-mini-text {
+	font-size: 10px;
+	color: var(--text-muted);
+	position: absolute;
+	right: -28px;
+	white-space: nowrap;
+}
+
+/* --- Task actions --- */
+.chronos-task-actions {
+	display: flex;
+	gap: 2px;
+	opacity: 0;
+	transition: opacity 0.15s;
+	flex-shrink: 0;
+	margin-left: auto;
+}
+
+.chronos-task-row:hover .chronos-task-actions {
+	opacity: 1;
+}
+
+/* ===== Gantt View ===== */
+.chronos-gantt-view {
+	padding: 0;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Filter group */
+.chronos-gantt-filter-group {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.chronos-gantt-filter-label {
+	font-size: 11px;
+	color: var(--text-muted);
+	margin-right: 2px;
+}
+
+.chronos-gantt-filter-btn {
+	padding: 3px 8px;
+	border-radius: 10px;
+	border: 1px solid var(--background-modifier-border);
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	font-size: 11px;
+	font-weight: 500;
+	transition: all 0.15s;
+}
+
+.chronos-gantt-filter-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.chronos-gantt-filter-active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: var(--interactive-accent);
+}
+
+.chronos-gantt-filter-active:hover {
+	opacity: 0.85;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+/* Gantt body: label col (fixed) + chart area (scrollable) */
+.chronos-gantt-body {
+	flex: 1;
+	display: flex;
+	overflow: hidden;
+}
+
+/* --- Label column (fixed left) --- */
+.chronos-gantt-label-col {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	border-right: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	z-index: 2;
+}
+
+.chronos-gantt-label-header {
+	flex-shrink: 0;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.chronos-gantt-label-rows {
+	flex: 1;
+	overflow: hidden; /* synced via JS */
+}
+
+.chronos-gantt-label-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding-right: 8px;
+	border-bottom: 1px solid var(--background-modifier-border-focus);
+	cursor: grab;
+	user-select: none;
+	transition: background 0.1s;
+	box-sizing: border-box;
+}
+
+.chronos-gantt-label-row:hover {
+	background: var(--background-modifier-hover);
+}
+
+.chronos-gantt-label-drag {
+	color: var(--text-faint);
+	font-size: 12px;
+	flex-shrink: 0;
+}
+
+.chronos-gantt-type-dot {
+	width: 16px;
+	height: 16px;
+	border-radius: 3px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 9px;
+	font-weight: 700;
+	color: white;
+	flex-shrink: 0;
+}
+
+.chronos-gantt-label-title {
+	font-size: 12px;
+	color: var(--text-normal);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.chronos-gantt-label-depth-0 .chronos-gantt-label-title {
+	font-weight: 600;
+}
+
+.chronos-gantt-label-depth-1 .chronos-gantt-label-title {
+	font-weight: 500;
+}
+
+.chronos-gantt-label-depth-2 .chronos-gantt-label-title {
+	color: var(--text-muted);
+}
+
+/* --- Resize handle --- */
+.chronos-gantt-resize-handle {
+	width: 4px;
+	flex-shrink: 0;
+	cursor: col-resize;
+	background: transparent;
+	transition: background 0.15s;
+	z-index: 3;
+}
+
+.chronos-gantt-resize-handle:hover {
+	background: var(--interactive-accent);
+	opacity: 0.6;
+}
+
+.chronos-gantt-resize-handle:active {
+	background: var(--interactive-accent);
+	opacity: 0.8;
+}
+
+/* --- Chart area (scrollable) --- */
+.chronos-gantt-chart-area {
+	flex: 1;
+	overflow: auto;
+}
+
+/* Chart header */
+.chronos-gantt-chart-header {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	background: var(--background-primary);
+	border-bottom: 1px solid var(--background-modifier-border);
+	display: flex;
+	flex-direction: column;
+}
+
+.chronos-gantt-month-row {
+	position: relative;
+	height: 22px;
+}
+
+.chronos-gantt-month-label {
+	position: absolute;
+	top: 0;
+	height: 22px;
+	line-height: 22px;
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--text-normal);
+	padding-left: 6px;
+	border-left: 1px solid var(--background-modifier-border);
+	box-sizing: border-box;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.chronos-gantt-day-row {
+	position: relative;
+	height: 20px;
+}
+
+.chronos-gantt-day-label {
+	position: absolute;
+	top: 0;
+	height: 20px;
+	line-height: 20px;
+	font-size: 9px;
+	color: var(--text-muted);
+	text-align: center;
+	box-sizing: border-box;
+}
+
+.chronos-gantt-day-label.chronos-gantt-weekend {
+	color: var(--text-faint);
+}
+
+/* Chart body */
+.chronos-gantt-chart-body {
+	position: relative;
+}
+
+/* Row stripes */
+.chronos-gantt-row-stripe {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+
+.chronos-gantt-row-alt {
+	background: var(--background-secondary-alt);
+	opacity: 0.3;
+}
+
+/* Weekend columns */
+.chronos-gantt-weekend-col {
+	position: absolute;
+	top: 0;
+	background: var(--background-modifier-border);
+	opacity: 0.15;
+	pointer-events: none;
+}
+
+/* Today line */
+.chronos-gantt-today-line {
+	position: absolute;
+	top: 0;
+	width: 2px;
+	background: var(--text-error);
+	opacity: 0.7;
+	z-index: 1;
+	pointer-events: none;
+}
+
+/* Bars */
+.chronos-gantt-bar {
+	position: absolute;
+	border-radius: 4px;
+	overflow: hidden;
+	cursor: grab;
+	z-index: 1;
+	transition: box-shadow 0.1s;
+}
+
+.chronos-gantt-bar:hover {
+	box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+}
+
+.chronos-gantt-bar:active {
+	cursor: grabbing;
+}
+
+.chronos-gantt-bar-bg {
+	position: absolute;
+	inset: 0;
+	opacity: 0.3;
+	border-radius: 4px;
+}
+
+.chronos-gantt-bar-fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 100%;
+	opacity: 0.85;
+	border-radius: 4px;
+}
+
+/* Progress % outside bar (for narrow bars) */
+.chronos-gantt-bar-pct {
+	position: absolute;
+	right: -30px;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 9px;
+	color: var(--text-muted);
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Progress % inside bar (for wide bars) */
+.chronos-gantt-bar-pct-inner {
+	position: absolute;
+	left: 6px;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 9px;
+	font-weight: 600;
+	color: white;
+	white-space: nowrap;
+	pointer-events: none;
+	z-index: 1;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Resize grips */
+.chronos-gantt-grip {
+	position: absolute;
+	top: 0;
+	width: 6px;
+	height: 100%;
+	cursor: col-resize;
+	z-index: 2;
+}
+
+.chronos-gantt-grip:hover {
+	background: rgba(255, 255, 255, 0.3);
+}
+
+.chronos-gantt-grip-left {
+	left: 0;
+}
+
+.chronos-gantt-grip-right {
+	right: 0;
+}
+
+/* Dependency SVG overlay */
+.chronos-gantt-dep-svg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	pointer-events: none;
+	z-index: 0;
+}
+
+/* Dependencies */
+.chronos-dep-line {
+	stroke: var(--text-muted);
+	stroke-width: 1.5;
+	opacity: 0.5;
+}
+
+.chronos-dep-arrow {
+	fill: var(--text-muted);
+	opacity: 0.5;
+}
+
+/* ===== Schedule View ===== */
+.chronos-schedule-view {
+	padding: 0;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.chronos-schedule-toolbar {
+	gap: 8px;
+}
+
+.chronos-toolbar-spacer {
+	flex: 1;
+}
+
+.chronos-schedule-date-label {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text-normal);
+	min-width: 160px;
+	text-align: center;
+}
+
+/* Slide toggle (Day / Week) */
+.chronos-slide-toggle {
+	flex-shrink: 0;
+}
+
+.chronos-slide-toggle-track {
+	position: relative;
+	display: flex;
+	align-items: center;
+	width: 100px;
+	height: 30px;
+	background: var(--background-modifier-border);
+	border-radius: 15px;
+	cursor: pointer;
+	overflow: hidden;
+}
+
+.chronos-slide-toggle-thumb {
+	position: absolute;
+	left: 2px;
+	top: 2px;
+	width: 48px;
+	height: 26px;
+	background: var(--interactive-accent);
+	border-radius: 13px;
+	transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	z-index: 0;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.chronos-slide-toggle-thumb-right {
+	left: 50px;
+}
+
+.chronos-slide-toggle-label {
+	flex: 1;
+	text-align: center;
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--text-muted);
+	position: relative;
+	z-index: 1;
+	user-select: none;
+	transition: color 0.2s;
+	line-height: 30px;
+}
+
+.chronos-slide-toggle-label-active {
+	color: var(--text-on-accent);
+}
+
+/* Schedule body */
+.chronos-schedule-body {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+/* --- Header row (fixed at top) --- */
+.chronos-schedule-header-row {
+	display: flex;
+	border-bottom: 1px solid var(--background-modifier-border);
+	flex-shrink: 0;
+	background: var(--background-primary);
+	z-index: 10;
+}
+
+.chronos-schedule-corner {
+	flex-shrink: 0;
+	border-right: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+}
+
+.chronos-schedule-header-columns {
+	display: flex;
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.chronos-schedule-col-header {
+	flex: 1;
+	min-width: 120px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 6px 0 8px;
+	border-left: 1px solid var(--background-modifier-border);
+	user-select: none;
+}
+
+.chronos-schedule-col-weekday {
+	font-size: 10px;
+	font-weight: 500;
+	color: var(--text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.chronos-schedule-col-day {
+	font-size: 20px;
+	font-weight: 600;
+	color: var(--text-normal);
+	line-height: 1.2;
+}
+
+.chronos-schedule-today {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-radius: 50%;
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* --- Scrollable area --- */
+.chronos-schedule-scroll-area {
+	flex: 1;
+	overflow: auto;
+	position: relative;
+}
+
+.chronos-schedule-inner {
+	display: flex;
+	position: relative;
+}
+
+/* Time labels column (sticky left) */
+.chronos-schedule-time-col {
+	flex-shrink: 0;
+	position: sticky;
+	left: 0;
+	z-index: 5;
+	background: var(--background-primary);
+	border-right: 1px solid var(--background-modifier-border);
+}
+
+.chronos-schedule-time-label {
+	position: absolute;
+	width: 100%;
+	font-size: 10px;
+	color: var(--text-muted);
+	padding: 1px 6px 0 2px;
+	text-align: right;
+	user-select: none;
+	line-height: 1;
+}
+
+/* Day columns container */
+.chronos-schedule-columns {
+	display: flex;
+	flex: 1;
+	min-width: 0;
+}
+
+/* Single day column */
+.chronos-schedule-col {
+	flex: 1;
+	min-width: 120px;
+	border-left: 1px solid var(--background-modifier-border);
+	position: relative;
+}
+
+/* Hour & half-hour lines */
+.chronos-schedule-hour-line {
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 0;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.chronos-schedule-half-line {
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 0;
+	border-top: 1px dashed var(--background-modifier-border-focus);
+	opacity: 0.5;
+}
+
+/* Current time indicator */
+.chronos-schedule-now-line {
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background: var(--text-error);
+	z-index: 10;
+	pointer-events: none;
+}
+
+.chronos-schedule-now-line::before {
+	content: "";
+	position: absolute;
+	left: -4px;
+	top: -3px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--text-error);
+}
+
+/* Schedule blocks */
+.chronos-schedule-block {
+	position: absolute;
+	left: 2px;
+	right: 2px;
+	border-radius: 4px;
+	padding: 3px 6px;
+	cursor: grab;
+	overflow: hidden;
+	opacity: 0.9;
+	z-index: 5;
+	transition: box-shadow 0.15s;
+	min-height: 20px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.chronos-schedule-block:hover {
+	opacity: 1;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	z-index: 6;
+}
+
+.chronos-schedule-block:active {
+	cursor: grabbing;
+}
+
+.chronos-schedule-block-title {
+	font-size: 11px;
+	font-weight: 600;
+	color: white;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.chronos-schedule-block-time {
+	font-size: 9px;
+	color: rgba(255, 255, 255, 0.8);
+}
+
+.chronos-schedule-block-badge {
+	position: absolute;
+	top: 2px;
+	right: 3px;
+	font-size: 7px;
+	font-weight: 700;
+	color: rgba(255, 255, 255, 0.6);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+/* Resize handle */
+.chronos-schedule-resize-handle {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 6px;
+	cursor: ns-resize;
+	background: transparent;
+}
+
+.chronos-schedule-resize-handle:hover {
+	background: rgba(255, 255, 255, 0.3);
+}
+
+/* Placeholder shown while dragging from task list */
+.chronos-schedule-placeholder {
+	position: absolute;
+	left: 2px;
+	right: 2px;
+	border-radius: 4px;
+	border: 2px dashed var(--interactive-accent);
+	background: var(--interactive-accent-hover);
+	opacity: 0.6;
+	z-index: 8;
+	pointer-events: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--interactive-accent);
+}
+
+/* Drag-to-delete overlay */
+.chronos-delete-overlay {
+	position: fixed;
+	padding: 6px 12px;
+	background: var(--background-modifier-error);
+	color: var(--text-on-accent);
+	border-radius: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	z-index: 1000;
+	pointer-events: none;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+	white-space: nowrap;
+}
+
+/* ===== Modal ===== */
+.chronos-modal {
+	padding: 8px;
+}
+
+.chronos-modal h2 {
+	margin-top: 0;
+	margin-bottom: 16px;
+}
+
+.chronos-modal-buttons {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 16px;
+	padding-top: 12px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+/* Block menu */
+.chronos-block-menu-task {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+	padding: 8px 10px;
+	background: var(--background-secondary);
+	border-radius: 6px;
+}
+
+.chronos-block-menu-task-title {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--text-normal);
+}
+
+.chronos-btn-danger {
+	padding: 6px 14px;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-error);
+	background: transparent;
+	color: var(--text-error);
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 500;
+}
+
+.chronos-btn-danger:hover {
+	background: var(--background-modifier-error);
+	color: var(--text-on-accent);
+}
+
+/* Quick add modal */
+.chronos-quick-add-subtext {
+	font-size: 13px;
+	color: var(--text-muted);
+	margin-bottom: 12px;
+}
+
+.chronos-quick-add-search {
+	margin-bottom: 8px;
+}
+
+.chronos-quick-add-search-input {
+	width: 100%;
+	padding: 6px 10px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: 13px;
+}
+
+.chronos-quick-add-search-input:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+}
+
+.chronos-quick-add-list {
+	max-height: 300px;
+	overflow-y: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+}
+
+.chronos-quick-add-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 10px;
+	cursor: pointer;
+	transition: background 0.1s;
+	border-bottom: 1px solid var(--background-modifier-border-focus);
+}
+
+.chronos-quick-add-row:last-child {
+	border-bottom: none;
+}
+
+.chronos-quick-add-row:hover {
+	background: var(--background-modifier-hover);
+}
+
+.chronos-quick-add-task-name {
+	font-size: 13px;
+	color: var(--text-normal);
+}
