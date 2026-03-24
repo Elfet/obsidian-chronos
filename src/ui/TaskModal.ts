@@ -99,7 +99,7 @@ export class TaskModal extends Modal {
 		const parentCandidates = this.getParentCandidates();
 		if (parentCandidates.length > 0) {
 			new Setting(contentEl).setName("Parent").addDropdown((dd) => {
-				dd.addOption("", "(None - root level)");
+				dd.addOption("", "(none - root level)");
 				for (const c of parentCandidates) {
 					dd.addOption(c.id, `${TASK_TYPE_LABELS[c.type]}: ${c.title}`);
 				}

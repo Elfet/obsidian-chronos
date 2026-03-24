@@ -38,7 +38,7 @@ export class TaskListView extends ItemView {
 		const toolbar = container.createEl("div", { cls: "chronos-toolbar" });
 
 		const addBtn = toolbar.createEl("button", {
-			text: "+ New task",
+			text: "+ new task",
 			cls: "chronos-btn chronos-btn-primary",
 		});
 		addBtn.addEventListener("click", () => this.openNewTaskModal());
@@ -74,7 +74,7 @@ export class TaskListView extends ItemView {
 			const empty = container.createEl("div", { cls: "chronos-empty-state" });
 			if (allTasks.length === 0) {
 				empty.createEl("div", { text: "No tasks yet", cls: "chronos-empty-title" });
-				empty.createEl("div", { text: "Click \"+ New task\" to create your first epic, story, or task.", cls: "chronos-empty-desc" });
+				empty.createEl("div", { text: "Click \"+ new task\" to create your first epic, story, or task.", cls: "chronos-empty-desc" });
 			} else {
 				empty.createEl("div", { text: "No tasks match the current filter.", cls: "chronos-empty-desc" });
 			}
