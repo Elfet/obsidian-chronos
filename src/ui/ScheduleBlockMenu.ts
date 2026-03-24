@@ -2,17 +2,12 @@ import { App, Modal, Setting } from "obsidian";
 import { ChronosStore } from "../store";
 import { ChronosTask, ScheduleEntry, TASK_TYPE_LABELS, TASK_COLORS } from "../types";
 
-/**
- * Modal shown when clicking a schedule block.
- * All changes are deferred until Save is pressed.
- */
 export class ScheduleBlockMenu extends Modal {
 	private store: ChronosStore;
 	private origTask: ChronosTask;
 	private origEntry: ScheduleEntry;
 	private onChanged: () => void;
 
-	// Form state (all changes buffered here, applied on Save)
 	private selectedTaskId: string;
 	private formDate: string;
 	private formStartTime: string;
@@ -42,9 +37,8 @@ export class ScheduleBlockMenu extends Modal {
 		contentEl.empty();
 		contentEl.addClass("chronos-modal");
 
-		contentEl.createEl("h2", { text: "Schedule Block" });
+		contentEl.createEl("h2", { text: "Schedule block" });
 
-		// Current task display
 		const taskInfo = contentEl.createEl("div", { cls: "chronos-block-menu-task" });
 		const badge = taskInfo.createEl("span", {
 			text: TASK_TYPE_LABELS[this.origTask.type],
@@ -56,7 +50,6 @@ export class ScheduleBlockMenu extends Modal {
 			cls: "chronos-block-menu-task-title",
 		});
 
-		// Switch task (just updates form state, no immediate save)
 		const allTasks = this.store.getAllTasks();
 		new Setting(contentEl).setName("Task").addDropdown((dd) => {
 			for (const t of allTasks) {
@@ -69,42 +62,40 @@ export class ScheduleBlockMenu extends Modal {
 			});
 		});
 
-		// Date
 		new Setting(contentEl).setName("Date").addText((text) => {
 			text.inputEl.type = "date";
 			text.setValue(this.formDate);
 			text.onChange((v) => { this.formDate = v; });
 		});
 
-		// Start time
-		new Setting(contentEl).setName("Start Time").addText((text) => {
+		new Setting(contentEl).setName("Start time").addText((text) => {
 			text.inputEl.type = "time";
 			text.setValue(this.formStartTime);
 			text.onChange((v) => { this.formStartTime = v; });
 		});
 
-		// End time
-		new Setting(contentEl).setName("End Time").addText((text) => {
+		new Setting(contentEl).setName("End time").addText((text) => {
 			text.inputEl.type = "time";
 			text.setValue(this.formEndTime);
 			text.onChange((v) => { this.formEndTime = v; });
 		});
 
-		// Buttons
 		const btnContainer = contentEl.createEl("div", { cls: "chronos-modal-buttons" });
 
 		const deleteBtn = btnContainer.createEl("button", {
 			text: "Remove",
 			cls: "chronos-btn-danger",
 		});
-		deleteBtn.addEventListener("click", async () => {
-			await this.store.removeScheduleEntry(
-				this.origTask.id,
-				this.origEntry.date,
-				this.origEntry.startTime,
-			);
-			this.onChanged();
-			this.close();
+		deleteBtn.addEventListener("click", () => {
+			void (async () => {
+				await this.store.removeScheduleEntry(
+					this.origTask.id,
+					this.origEntry.date,
+					this.origEntry.startTime,
+				);
+				this.onChanged();
+				this.close();
+			})();
 		});
 
 		btnContainer.createEl("div", { cls: "chronos-toolbar-spacer" });
@@ -119,7 +110,7 @@ export class ScheduleBlockMenu extends Modal {
 			text: "Save",
 			cls: "mod-cta",
 		});
-		saveBtn.addEventListener("click", () => this.handleSave());
+		saveBtn.addEventListener("click", () => { void this.handleSave(); });
 	}
 
 	private async handleSave(): Promise<void> {
@@ -130,7 +121,6 @@ export class ScheduleBlockMenu extends Modal {
 			this.formEndTime !== this.origEntry.endTime;
 
 		if (taskChanged || dateChanged) {
-			// Remove old entry, create new one on the (possibly different) task & date
 			await this.store.removeScheduleEntry(
 				this.origTask.id,
 				this.origEntry.date,
@@ -149,7 +139,6 @@ export class ScheduleBlockMenu extends Modal {
 				{ startTime: this.formStartTime, endTime: this.formEndTime },
 			);
 		} else {
-			// Nothing changed
 			this.close();
 			return;
 		}
@@ -163,17 +152,12 @@ export class ScheduleBlockMenu extends Modal {
 	}
 }
 
-/**
- * Modal shown when clicking an empty time slot.
- * Allows selecting a task to schedule.
- */
 export class ScheduleQuickAddModal extends Modal {
 	private store: ChronosStore;
 	private date: string;
 	private startTime: string;
 	private endTime: string;
 	private onChanged: () => void;
-	private unsubscribe: (() => void) | null = null;
 
 	constructor(
 		app: App,
@@ -192,9 +176,6 @@ export class ScheduleQuickAddModal extends Modal {
 	}
 
 	onOpen(): void {
-		// Prevent store notifications from re-rendering the parent view
-		// while this modal is open by temporarily unsubscribing won't work
-		// since we don't control the view. Instead, just render the modal content.
 		this.renderContent();
 	}
 
@@ -203,27 +184,25 @@ export class ScheduleQuickAddModal extends Modal {
 		contentEl.empty();
 		contentEl.addClass("chronos-modal", "chronos-quick-add-modal");
 
-		const heading = contentEl.createEl("h2", {
-			text: `Add to schedule`,
+		contentEl.createEl("h2", {
+			text: "Add to schedule",
 		});
 
-		const subtext = contentEl.createEl("div", {
+		contentEl.createEl("div", {
 			text: `${this.date}  ${this.startTime} - ${this.endTime}`,
 			cls: "chronos-quick-add-subtext",
 		});
 
-		// Get tasks at render time (fresh data)
 		const allTasks = this.store.getAllTasks();
 
 		if (allTasks.length === 0) {
 			contentEl.createEl("p", {
-				text: "No tasks available. Create tasks in the Task List first.",
+				text: "No tasks available. Create tasks in the task list first.",
 				cls: "chronos-empty-desc",
 			});
 			return;
 		}
 
-		// Search/filter
 		const searchContainer = contentEl.createEl("div", { cls: "chronos-quick-add-search" });
 		const searchInput = searchContainer.createEl("input", {
 			type: "text",
@@ -251,22 +230,24 @@ export class ScheduleQuickAddModal extends Modal {
 				const row = list.createEl("div", { cls: "chronos-quick-add-row" });
 				const color = task.color ?? TASK_COLORS[task.type];
 
-				const badge = row.createEl("span", {
+				const rowBadge = row.createEl("span", {
 					text: TASK_TYPE_LABELS[task.type],
 					cls: "chronos-badge",
 				});
-				badge.style.backgroundColor = color;
+				rowBadge.style.backgroundColor = color;
 
 				row.createEl("span", { text: task.title, cls: "chronos-quick-add-task-name" });
 
-				row.addEventListener("click", async () => {
-					await this.store.addScheduleEntry(task.id, {
-						date: this.date,
-						startTime: this.startTime,
-						endTime: this.endTime,
-					});
-					this.onChanged();
-					this.close();
+				row.addEventListener("click", () => {
+					void (async () => {
+						await this.store.addScheduleEntry(task.id, {
+							date: this.date,
+							startTime: this.startTime,
+							endTime: this.endTime,
+						});
+						this.onChanged();
+						this.close();
+					})();
 				});
 			}
 		};
@@ -277,7 +258,6 @@ export class ScheduleQuickAddModal extends Modal {
 			renderList(searchInput.value);
 		});
 
-		// Focus search input
 		setTimeout(() => searchInput.focus(), 50);
 	}
 

@@ -19,27 +19,27 @@ export default class ChronosPlugin extends Plugin {
 		this.registerView(DAY_SCHEDULE_VIEW_TYPE, (leaf) => new DayScheduleView(leaf, this.store));
 
 		// Ribbon icons
-		this.addRibbonIcon("list-checks", "Chronos Tasks", () => this.activateView(TASK_LIST_VIEW_TYPE));
-		this.addRibbonIcon("gantt-chart", "Chronos Gantt", () => this.activateView(GANTT_VIEW_TYPE));
-		this.addRibbonIcon("calendar-clock", "Chronos Schedule", () => this.activateView(DAY_SCHEDULE_VIEW_TYPE));
+		this.addRibbonIcon("list-checks", "Chronos tasks", () => { void this.activateView(TASK_LIST_VIEW_TYPE); });
+		this.addRibbonIcon("gantt-chart", "Chronos gantt", () => { void this.activateView(GANTT_VIEW_TYPE); });
+		this.addRibbonIcon("calendar-clock", "Chronos schedule", () => { void this.activateView(DAY_SCHEDULE_VIEW_TYPE); });
 
 		// Commands
 		this.addCommand({
 			id: "open-task-list",
-			name: "Open Task List",
-			callback: () => this.activateView(TASK_LIST_VIEW_TYPE),
+			name: "Open task list",
+			callback: () => { void this.activateView(TASK_LIST_VIEW_TYPE); },
 		});
 
 		this.addCommand({
 			id: "open-gantt-chart",
-			name: "Open Gantt Chart",
-			callback: () => this.activateView(GANTT_VIEW_TYPE),
+			name: "Open gantt chart",
+			callback: () => { void this.activateView(GANTT_VIEW_TYPE); },
 		});
 
 		this.addCommand({
 			id: "open-day-schedule",
-			name: "Open Day Schedule",
-			callback: () => this.activateView(DAY_SCHEDULE_VIEW_TYPE),
+			name: "Open day schedule",
+			callback: () => { void this.activateView(DAY_SCHEDULE_VIEW_TYPE); },
 		});
 	}
 
@@ -59,7 +59,7 @@ export default class ChronosPlugin extends Plugin {
 		}
 
 		if (leaf) {
-			workspace.revealLeaf(leaf);
+			await workspace.revealLeaf(leaf);
 		}
 	}
 

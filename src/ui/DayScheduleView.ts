@@ -19,11 +19,9 @@ export class DayScheduleView extends ItemView {
 	private currentDate: string;
 	private viewMode: ViewMode = "week";
 
-	// References
 	private gridWrapperEl: HTMLElement | null = null;
 	private columnEls: Map<string, HTMLElement> = new Map();
 
-	// Block drag state
 	private blockDrag: {
 		taskId: string;
 		date: string;
@@ -34,14 +32,12 @@ export class DayScheduleView extends ItemView {
 		origStartMinutes: number;
 		origEndMinutes: number;
 		isOutside: boolean;
-		currentDate: string; // track which column we're over
-		hasMoved: boolean;   // distinguish click vs drag
+		currentDate: string;
+		hasMoved: boolean;
 	} | null = null;
 
-	// Scroll position preservation
 	private savedScrollTop: number | null = null;
 	private autoScrollTimer: number | null = null;
-	// Timestamp of last drag end — suppress clicks for a window after drag
 	private dragEndTime = 0;
 
 	constructor(leaf: WorkspaceLeaf, store: ChronosStore) {
@@ -51,20 +47,22 @@ export class DayScheduleView extends ItemView {
 	}
 
 	getViewType(): string { return DAY_SCHEDULE_VIEW_TYPE; }
-	getDisplayText(): string { return "Chronos Schedule"; }
+	getDisplayText(): string { return "Chronos schedule"; }
 	getIcon(): string { return "calendar-clock"; }
 
-	async onOpen(): Promise<void> {
+	onOpen(): Promise<void> {
 		this.unsubscribe = this.store.subscribe(() => {
 			this.saveScroll();
 			this.render();
 		});
 		this.render();
+		return Promise.resolve();
 	}
 
-	async onClose(): Promise<void> {
+	onClose(): Promise<void> {
 		this.unsubscribe?.();
 		this.stopAutoScroll();
+		return Promise.resolve();
 	}
 
 	private saveScroll(): void {
@@ -80,12 +78,11 @@ export class DayScheduleView extends ItemView {
 		}
 	}
 
-	/** Auto-scroll the grid when cursor is near top/bottom edge during drag */
 	private handleAutoScroll(clientY: number): void {
 		if (!this.gridWrapperEl) return;
 		const rect = this.gridWrapperEl.getBoundingClientRect();
-		const edgeZone = 40; // px from edge to trigger scroll
-		const scrollSpeed = 8; // px per frame
+		const edgeZone = 40;
+		const scrollSpeed = 8;
 
 		const distFromTop = clientY - rect.top;
 		const distFromBottom = rect.bottom - clientY;
@@ -105,7 +102,7 @@ export class DayScheduleView extends ItemView {
 			if (this.gridWrapperEl) {
 				this.gridWrapperEl.scrollTop += speed;
 			}
-		}, 16); // ~60fps
+		}, 16);
 	}
 
 	private stopAutoScroll(): void {
@@ -141,7 +138,6 @@ export class DayScheduleView extends ItemView {
 		);
 	}
 
-	/** Detect which date column the cursor is over */
 	private getDateAtClientX(clientX: number): string | null {
 		for (const [dateStr, colEl] of this.columnEls) {
 			const rect = colEl.getBoundingClientRect();
@@ -191,7 +187,6 @@ export class DayScheduleView extends ItemView {
 		const gridHeight = (END_HOUR - START_HOUR) * HOUR_HEIGHT;
 		const body = container.createEl("div", { cls: "chronos-schedule-body" });
 
-		// --- Header row ---
 		const headerRow = body.createEl("div", { cls: "chronos-schedule-header-row" });
 		const corner = headerRow.createEl("div", { cls: "chronos-schedule-corner" });
 		corner.style.width = `${TIME_LABEL_WIDTH}px`;
@@ -211,7 +206,6 @@ export class DayScheduleView extends ItemView {
 			});
 		}
 
-		// --- Scroll area ---
 		const scrollArea = body.createEl("div", { cls: "chronos-schedule-scroll-area" });
 		this.gridWrapperEl = scrollArea;
 
@@ -222,7 +216,6 @@ export class DayScheduleView extends ItemView {
 		const inner = scrollArea.createEl("div", { cls: "chronos-schedule-inner" });
 		inner.style.height = `${gridHeight}px`;
 
-		// Time column
 		const timeCol = inner.createEl("div", { cls: "chronos-schedule-time-col" });
 		timeCol.style.width = `${TIME_LABEL_WIDTH}px`;
 		timeCol.style.minWidth = `${TIME_LABEL_WIDTH}px`;
@@ -234,14 +227,12 @@ export class DayScheduleView extends ItemView {
 			label.textContent = `${displayHour}:00 ${ampm}`;
 		}
 
-		// Day columns
 		const columnsContainer = inner.createEl("div", { cls: "chronos-schedule-columns" });
 		for (const dateStr of dates) {
 			const col = columnsContainer.createEl("div", { cls: "chronos-schedule-col" });
 			col.style.height = `${gridHeight}px`;
 			this.columnEls.set(dateStr, col);
 
-			// Hour lines
 			for (let h = START_HOUR; h < END_HOUR; h++) {
 				const hourLine = col.createEl("div", { cls: "chronos-schedule-hour-line" });
 				hourLine.style.top = `${(h - START_HOUR) * HOUR_HEIGHT}px`;
@@ -249,7 +240,6 @@ export class DayScheduleView extends ItemView {
 				halfLine.style.top = `${(h - START_HOUR) * HOUR_HEIGHT + HOUR_HEIGHT / 2}px`;
 			}
 
-			// Click to add (suppress if drag just ended)
 			col.addEventListener("click", (e) => {
 				if (this.blockDrag) return;
 				if (Date.now() - this.dragEndTime < 300) return;
@@ -258,25 +248,19 @@ export class DayScheduleView extends ItemView {
 				const minutes = this.gridYToMinutes(gridY);
 				const endMinutes = clampMinutes(minutes + 60);
 				new ScheduleQuickAddModal(
-					this.app,
-					this.store,
-					dateStr,
-					minutesToTime(minutes),
-					minutesToTime(endMinutes),
+					this.app, this.store, dateStr,
+					minutesToTime(minutes), minutesToTime(endMinutes),
 					() => this.render(),
 				).open();
 			});
 
-			// External D&D
 			this.setupColumnDragDrop(col, dateStr);
 
-			// Blocks
 			const entries = this.store.getScheduleForDate(dateStr);
 			for (const { task, entry } of entries) {
 				this.renderScheduleBlock(col, task, entry);
 			}
 
-			// Now line
 			if (dateStr === formatDateStr(new Date())) {
 				const now = new Date();
 				const nowY = this.minutesToGridY(now.getHours() * 60 + now.getMinutes());
@@ -285,7 +269,6 @@ export class DayScheduleView extends ItemView {
 			}
 		}
 
-		// Restore scroll position if saved (e.g. during drag re-render)
 		this.restoreScroll();
 	}
 
@@ -294,7 +277,6 @@ export class DayScheduleView extends ItemView {
 	private renderToolbar(container: HTMLElement): void {
 		const toolbar = container.createEl("div", { cls: "chronos-toolbar chronos-schedule-toolbar" });
 
-		// Slide toggle
 		const toggle = toolbar.createEl("div", { cls: "chronos-slide-toggle" });
 		const toggleTrack = toggle.createEl("div", { cls: "chronos-slide-toggle-track" });
 
@@ -308,25 +290,13 @@ export class DayScheduleView extends ItemView {
 		});
 
 		const thumb = toggleTrack.createEl("div", { cls: "chronos-slide-toggle-thumb" });
-		if (this.viewMode === "week") {
-			thumb.addClass("chronos-slide-toggle-thumb-right");
-		}
+		if (this.viewMode === "week") thumb.addClass("chronos-slide-toggle-thumb-right");
 
-		dayLabel.addEventListener("click", () => {
-			if (this.viewMode === "day") return;
-			this.viewMode = "day";
-			this.render();
-		});
-		weekLabel.addEventListener("click", () => {
-			if (this.viewMode === "week") return;
-			this.viewMode = "week";
-			this.currentDate = getMondayOf(this.currentDate);
-			this.render();
-		});
+		dayLabel.addEventListener("click", () => { if (this.viewMode !== "day") { this.viewMode = "day"; this.render(); } });
+		weekLabel.addEventListener("click", () => { if (this.viewMode !== "week") { this.viewMode = "week"; this.currentDate = getMondayOf(this.currentDate); this.render(); } });
 
 		toolbar.createEl("div", { cls: "chronos-toolbar-spacer" });
 
-		// Navigation
 		const prevBtn = toolbar.createEl("button", { text: "‹", cls: "chronos-btn" });
 		prevBtn.addEventListener("click", () => this.navigatePrev());
 
@@ -353,8 +323,7 @@ export class DayScheduleView extends ItemView {
 	// ========== External D&D ==========
 
 	private setupColumnDragDrop(colBody: HTMLElement, dateStr: string): void {
-		const placeholder = colBody.createEl("div", { cls: "chronos-schedule-placeholder" });
-		placeholder.style.display = "none";
+		const placeholder = colBody.createEl("div", { cls: "chronos-schedule-placeholder chronos-hidden" });
 
 		colBody.addEventListener("dragover", (e) => {
 			e.preventDefault();
@@ -362,27 +331,26 @@ export class DayScheduleView extends ItemView {
 			const gridY = this.clientYToGridY(e.clientY);
 			const minutes = this.gridYToMinutes(gridY);
 			const snappedY = this.minutesToGridY(minutes);
-			placeholder.style.display = "block";
-			placeholder.style.top = `${snappedY}px`;
-			placeholder.style.height = `${HOUR_HEIGHT}px`;
+			placeholder.removeClass("chronos-hidden");
+			placeholder.setCssProps({ "--top": `${snappedY}px`, "--height": `${HOUR_HEIGHT}px` });
 			const endMinutes = Math.min(minutes + 60, END_HOUR * 60);
 			placeholder.textContent = `${minutesToTime(minutes)} - ${minutesToTime(endMinutes)}`;
 		});
 
 		colBody.addEventListener("dragleave", (e) => {
 			const related = e.relatedTarget as HTMLElement | null;
-			if (!related || !colBody.contains(related)) placeholder.style.display = "none";
+			if (!related || !colBody.contains(related)) placeholder.addClass("chronos-hidden");
 		});
 
-		colBody.addEventListener("drop", async (e) => {
+		colBody.addEventListener("drop", (e) => {
 			e.preventDefault();
-			placeholder.style.display = "none";
+			placeholder.addClass("chronos-hidden");
 			const taskId = e.dataTransfer?.getData("text/plain");
 			if (!taskId || !this.store.getTask(taskId)) return;
 			const gridY = this.clientYToGridY(e.clientY);
 			const startMinutes = this.gridYToMinutes(gridY);
 			const endMinutes = clampMinutes(startMinutes + 60);
-			await this.store.addScheduleEntry(taskId, {
+			void this.store.addScheduleEntry(taskId, {
 				date: dateStr,
 				startTime: minutesToTime(startMinutes),
 				endTime: minutesToTime(endMinutes),
@@ -411,7 +379,6 @@ export class DayScheduleView extends ItemView {
 		block.createEl("div", { cls: "chronos-schedule-block-time", text: `${entry.startTime} - ${entry.endTime}` });
 		block.createEl("span", { cls: "chronos-schedule-block-badge", text: TASK_TYPE_LABELS[task.type] });
 
-		// Drag to move
 		block.addEventListener("mousedown", (e: MouseEvent) => {
 			if ((e.target as HTMLElement).classList.contains("chronos-schedule-resize-handle")) return;
 			e.preventDefault();
@@ -419,7 +386,6 @@ export class DayScheduleView extends ItemView {
 			this.startBlockDrag(e, task, entry, "move");
 		});
 
-		// Resize handle
 		const resizeHandle = block.createEl("div", { cls: "chronos-schedule-resize-handle" });
 		resizeHandle.addEventListener("mousedown", (e: MouseEvent) => {
 			e.preventDefault();
@@ -427,7 +393,6 @@ export class DayScheduleView extends ItemView {
 			this.startBlockDrag(e, task, entry, "resize-bottom");
 		});
 
-		// Context menu
 		block.addEventListener("contextmenu", (e) => {
 			e.preventDefault();
 			const menu = new Menu();
@@ -437,37 +402,29 @@ export class DayScheduleView extends ItemView {
 				})
 			);
 			menu.addItem((item) =>
-				item.setTitle("Remove from schedule").setIcon("trash").onClick(async () => {
-					await this.store.removeScheduleEntry(task.id, entry.date, entry.startTime);
+				item.setTitle("Remove from schedule").setIcon("trash").onClick(() => {
+					void this.store.removeScheduleEntry(task.id, entry.date, entry.startTime);
 				})
 			);
 			menu.showAtMouseEvent(e);
 		});
 	}
 
-	// ========== Block drag (move / resize / cross-day / delete) ==========
+	// ========== Block drag ==========
 
 	private startBlockDrag(
-		e: MouseEvent,
-		task: ChronosTask,
-		entry: ScheduleEntry,
+		e: MouseEvent, task: ChronosTask, entry: ScheduleEntry,
 		mode: "move" | "resize-bottom"
 	): void {
 		const startMinutes = parseTimeToMinutes(entry.startTime);
 		const endMinutes = parseTimeToMinutes(entry.endTime);
 
 		this.blockDrag = {
-			taskId: task.id,
-			date: entry.date,
-			origStartTime: entry.startTime,
-			origEndTime: entry.endTime,
-			mode,
+			taskId: task.id, date: entry.date,
+			origStartTime: entry.startTime, origEndTime: entry.endTime, mode,
 			anchorGridY: this.clientYToGridY(e.clientY),
-			origStartMinutes: startMinutes,
-			origEndMinutes: endMinutes,
-			isOutside: false,
-			currentDate: entry.date,
-			hasMoved: false,
+			origStartMinutes: startMinutes, origEndMinutes: endMinutes,
+			isOutside: false, currentDate: entry.date, hasMoved: false,
 		};
 
 		let lastSavedStart = entry.startTime;
@@ -481,11 +438,8 @@ export class DayScheduleView extends ItemView {
 
 			const inside = this.isInsideGrid(ev.clientX, ev.clientY);
 			this.blockDrag.isOutside = !inside;
-
-			// Auto-scroll when near edges
 			this.handleAutoScroll(ev.clientY);
 
-			// Outside → show delete indicator
 			if (!inside && mode === "move") {
 				if (!deleteOverlay) {
 					deleteOverlay = document.body.createEl("div", { cls: "chronos-delete-overlay" });
@@ -495,12 +449,8 @@ export class DayScheduleView extends ItemView {
 				deleteOverlay.style.top = `${ev.clientY + 16}px`;
 				return;
 			}
-			if (deleteOverlay) {
-				deleteOverlay.remove();
-				deleteOverlay = null;
-			}
+			if (deleteOverlay) { deleteOverlay.remove(); deleteOverlay = null; }
 
-			// Detect cross-day movement
 			let targetDate = lastSavedDate;
 			if (mode === "move") {
 				const hoveredDate = this.getDateAtClientX(ev.clientX);
@@ -530,20 +480,13 @@ export class DayScheduleView extends ItemView {
 
 			if (newStartTime === lastSavedStart && newEndTime === lastSavedEnd && targetDate === lastSavedDate) return;
 
-			// Cross-day: remove from old date, add to new date
 			if (targetDate !== lastSavedDate) {
-				this.store.removeScheduleEntry(
-					this.blockDrag.taskId,
-					lastSavedDate,
-					lastSavedStart
-				).then(() => {
-					if (!this.blockDrag) return;
-					return this.store.addScheduleEntry(this.blockDrag.taskId, {
-						date: targetDate,
-						startTime: newStartTime,
-						endTime: newEndTime,
+				const bd = this.blockDrag;
+				void (async () => {
+					await this.store.removeScheduleEntry(bd.taskId, lastSavedDate, lastSavedStart);
+					await this.store.addScheduleEntry(bd.taskId, {
+						date: targetDate, startTime: newStartTime, endTime: newEndTime,
 					});
-				}).then(() => {
 					if (!this.blockDrag) return;
 					this.blockDrag.date = targetDate;
 					this.blockDrag.origStartTime = newStartTime;
@@ -554,13 +497,12 @@ export class DayScheduleView extends ItemView {
 					lastSavedStart = newStartTime;
 					lastSavedEnd = newEndTime;
 					lastSavedDate = targetDate;
-				});
+				})();
 			} else {
 				lastSavedStart = newStartTime;
 				lastSavedEnd = newEndTime;
-				this.store.updateScheduleEntry(
-					this.blockDrag.taskId,
-					this.blockDrag.date,
+				void this.store.updateScheduleEntry(
+					this.blockDrag.taskId, this.blockDrag.date,
 					this.blockDrag.origStartTime,
 					{ startTime: newStartTime, endTime: newEndTime }
 				).then(() => {
@@ -574,33 +516,26 @@ export class DayScheduleView extends ItemView {
 			}
 		};
 
-		const onMouseUp = async () => {
+		const onMouseUp = () => {
 			document.removeEventListener("mousemove", onMouseMove);
 			document.removeEventListener("mouseup", onMouseUp);
 			this.stopAutoScroll();
 
-			if (deleteOverlay) {
-				deleteOverlay.remove();
-				deleteOverlay = null;
-			}
+			if (deleteOverlay) { deleteOverlay.remove(); deleteOverlay = null; }
 
 			const drag = this.blockDrag;
 			this.blockDrag = null;
-
-			// Suppress click events that may fire right after mouseup
 			this.dragEndTime = Date.now();
 
 			if (!drag) return;
 
-			// If didn't move → open edit modal (click behavior)
 			if (!drag.hasMoved) {
 				new ScheduleBlockMenu(this.app, this.store, task, entry, () => this.render()).open();
 				return;
 			}
 
-			// If released outside → delete
 			if (drag.isOutside && mode === "move") {
-				await this.store.removeScheduleEntry(drag.taskId, drag.date, drag.origStartTime);
+				void this.store.removeScheduleEntry(drag.taskId, drag.date, drag.origStartTime);
 			}
 		};
 

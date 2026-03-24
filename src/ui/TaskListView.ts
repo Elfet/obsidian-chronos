@@ -16,16 +16,18 @@ export class TaskListView extends ItemView {
 	}
 
 	getViewType(): string { return TASK_LIST_VIEW_TYPE; }
-	getDisplayText(): string { return "Chronos Tasks"; }
+	getDisplayText(): string { return "Chronos tasks"; }
 	getIcon(): string { return "list-checks"; }
 
-	async onOpen(): Promise<void> {
+	onOpen(): Promise<void> {
 		this.unsubscribe = this.store.subscribe(() => this.render());
 		this.render();
+		return Promise.resolve();
 	}
 
-	async onClose(): Promise<void> {
+	onClose(): Promise<void> {
 		this.unsubscribe?.();
+		return Promise.resolve();
 	}
 
 	private render(): void {
@@ -33,18 +35,16 @@ export class TaskListView extends ItemView {
 		container.empty();
 		container.addClass("chronos-task-list-view");
 
-		// Toolbar
 		const toolbar = container.createEl("div", { cls: "chronos-toolbar" });
 
 		const addBtn = toolbar.createEl("button", {
-			text: "+ New Task",
+			text: "+ New task",
 			cls: "chronos-btn chronos-btn-primary",
 		});
 		addBtn.addEventListener("click", () => this.openNewTaskModal());
 
 		toolbar.createEl("div", { cls: "chronos-toolbar-spacer" });
 
-		// Status filter
 		const filterGroup = toolbar.createEl("div", { cls: "chronos-gantt-filter-group" });
 		const statuses: TaskStatus[] = ["todo", "in-progress", "done"];
 		for (const status of statuses) {
@@ -63,7 +63,6 @@ export class TaskListView extends ItemView {
 			});
 		}
 
-		// Task count
 		const allTasks = this.store.getAllTasks();
 		const filteredTree = this.store.getTaskTree().filter(({ task }) => this.visibleStatuses.has(task.status));
 		filterGroup.createEl("span", {
@@ -71,12 +70,11 @@ export class TaskListView extends ItemView {
 			cls: "chronos-task-count",
 		});
 
-		// Task tree
 		if (filteredTree.length === 0) {
 			const empty = container.createEl("div", { cls: "chronos-empty-state" });
 			if (allTasks.length === 0) {
 				empty.createEl("div", { text: "No tasks yet", cls: "chronos-empty-title" });
-				empty.createEl("div", { text: "Click \"+ New Task\" to create your first epic, story, or task.", cls: "chronos-empty-desc" });
+				empty.createEl("div", { text: "Click \"+ New task\" to create your first epic, story, or task.", cls: "chronos-empty-desc" });
 			} else {
 				empty.createEl("div", { text: "No tasks match the current filter.", cls: "chronos-empty-desc" });
 			}
@@ -95,41 +93,34 @@ export class TaskListView extends ItemView {
 		});
 		row.style.paddingLeft = `${depth * 24 + 8}px`;
 
-		// Make the whole row draggable
 		row.draggable = true;
 		row.addEventListener("dragstart", (e) => {
 			e.dataTransfer?.setData("text/plain", task.id);
 			if (e.dataTransfer) {
 				e.dataTransfer.effectAllowed = "copyMove";
-				// Transparent ghost so only the schedule placeholder is visible
 				const ghost = document.createElement("div");
-				ghost.style.cssText = "width:1px;height:1px;opacity:0;position:absolute;top:-9999px";
+				ghost.addClass("chronos-drag-ghost");
 				document.body.appendChild(ghost);
 				e.dataTransfer.setDragImage(ghost, 0, 0);
 				setTimeout(() => ghost.remove(), 0);
 			}
 		});
 
-		// Drag handle (visual indicator only now)
 		row.createEl("span", { cls: "chronos-drag-handle", text: "⠿" });
 
-		// Type badge
 		const badge = row.createEl("span", {
 			text: TASK_TYPE_LABELS[task.type],
 			cls: `chronos-badge chronos-badge-${task.type}`,
 		});
 		badge.style.backgroundColor = TASK_COLORS[task.type];
 
-		// Title
 		row.createEl("span", { text: task.title, cls: "chronos-task-title" });
 
-		// Status
 		row.createEl("span", {
 			text: STATUS_LABELS[task.status],
 			cls: `chronos-status chronos-status-${task.status}`,
 		});
 
-		// Dates
 		if (task.startDate && task.endDate) {
 			row.createEl("span", {
 				text: `${task.startDate} → ${task.endDate}`,
@@ -137,7 +128,6 @@ export class TaskListView extends ItemView {
 			});
 		}
 
-		// Progress bar
 		const progressContainer = row.createEl("span", { cls: "chronos-progress-mini" });
 		const progressBar = progressContainer.createEl("span", { cls: "chronos-progress-mini-bar" });
 		progressBar.style.width = `${task.progress}%`;
@@ -147,7 +137,6 @@ export class TaskListView extends ItemView {
 			cls: "chronos-progress-mini-text",
 		});
 
-		// Actions
 		const actions = row.createEl("span", { cls: "chronos-task-actions" });
 
 		if (task.type === "epic" || task.type === "story") {
@@ -170,13 +159,11 @@ export class TaskListView extends ItemView {
 			this.openEditTaskModal(task);
 		});
 
-		// Context menu
 		row.addEventListener("contextmenu", (e) => {
 			e.preventDefault();
 			this.showContextMenu(e, task);
 		});
 
-		// Drop zone
 		row.addEventListener("dragover", (e) => {
 			e.preventDefault();
 			row.addClass("chronos-drop-target");
@@ -184,15 +171,17 @@ export class TaskListView extends ItemView {
 		row.addEventListener("dragleave", () => {
 			row.removeClass("chronos-drop-target");
 		});
-		row.addEventListener("drop", async (e) => {
+		row.addEventListener("drop", (e) => {
 			e.preventDefault();
 			row.removeClass("chronos-drop-target");
 			const draggedId = e.dataTransfer?.getData("text/plain");
 			if (draggedId && draggedId !== task.id) {
 				const dragged = this.store.getTask(draggedId);
 				if (dragged) {
-					await this.store.updateTask(draggedId, { parentId: task.parentId });
-					await this.store.reorderTask(draggedId, task.order + 1);
+					void (async () => {
+						await this.store.updateTask(draggedId, { parentId: task.parentId });
+						await this.store.reorderTask(draggedId, task.order + 1);
+					})();
 				}
 			}
 		});
@@ -205,7 +194,7 @@ export class TaskListView extends ItemView {
 			menu.addItem((item) => item.setTitle("Add child").setIcon("plus").onClick(() => this.openNewTaskModal(task.id)));
 		}
 		menu.addSeparator();
-		menu.addItem((item) => item.setTitle("Delete").setIcon("trash").onClick(async () => { await this.store.deleteTask(task.id); }));
+		menu.addItem((item) => item.setTitle("Delete").setIcon("trash").onClick(() => { void this.store.deleteTask(task.id); }));
 		menu.showAtMouseEvent(e);
 	}
 

@@ -67,10 +67,9 @@ export class TaskModal extends Modal {
 		contentEl.addClass("chronos-modal");
 
 		contentEl.createEl("h2", {
-			text: this.editingTask ? "Edit Task" : "New Task",
+			text: this.editingTask ? "Edit task" : "New task",
 		});
 
-		// Title
 		new Setting(contentEl).setName("Title").addText((text) =>
 			text
 				.setPlaceholder("Task title")
@@ -78,7 +77,6 @@ export class TaskModal extends Modal {
 				.onChange((v) => (this.formData.title = v))
 		);
 
-		// Type
 		new Setting(contentEl).setName("Type").addDropdown((dd) => {
 			for (const [value, label] of Object.entries(TASK_TYPE_LABELS)) {
 				dd.addOption(value, label);
@@ -87,7 +85,6 @@ export class TaskModal extends Modal {
 			dd.onChange((v) => (this.formData.type = v as TaskType));
 		});
 
-		// Status
 		new Setting(contentEl).setName("Status").addDropdown((dd) => {
 			for (const [value, label] of Object.entries(STATUS_LABELS)) {
 				dd.addOption(value, label);
@@ -99,11 +96,10 @@ export class TaskModal extends Modal {
 			});
 		});
 
-		// Parent
 		const parentCandidates = this.getParentCandidates();
 		if (parentCandidates.length > 0) {
 			new Setting(contentEl).setName("Parent").addDropdown((dd) => {
-				dd.addOption("", "(None - Root level)");
+				dd.addOption("", "(None - root level)");
 				for (const c of parentCandidates) {
 					dd.addOption(c.id, `${TASK_TYPE_LABELS[c.type]}: ${c.title}`);
 				}
@@ -112,21 +108,18 @@ export class TaskModal extends Modal {
 			});
 		}
 
-		// Start Date
-		new Setting(contentEl).setName("Start Date").addText((text) => {
+		new Setting(contentEl).setName("Start date").addText((text) => {
 			text.inputEl.type = "date";
 			text.setValue(this.formData.startDate);
 			text.onChange((v) => (this.formData.startDate = v));
 		});
 
-		// End Date
-		new Setting(contentEl).setName("End Date").addText((text) => {
+		new Setting(contentEl).setName("End date").addText((text) => {
 			text.inputEl.type = "date";
 			text.setValue(this.formData.endDate);
 			text.onChange((v) => (this.formData.endDate = v));
 		});
 
-		// Progress
 		new Setting(contentEl).setName("Progress (%)").addSlider((slider) =>
 			slider
 				.setLimits(0, 100, 5)
@@ -135,7 +128,6 @@ export class TaskModal extends Modal {
 				.onChange((v) => (this.formData.progress = v))
 		);
 
-		// Description
 		new Setting(contentEl).setName("Description").addTextArea((ta) =>
 			ta
 				.setPlaceholder("Optional description...")
@@ -143,14 +135,13 @@ export class TaskModal extends Modal {
 				.onChange((v) => (this.formData.description = v))
 		);
 
-		// Buttons
 		const btnContainer = contentEl.createEl("div", { cls: "chronos-modal-buttons" });
 
 		const saveBtn = btnContainer.createEl("button", {
 			text: this.editingTask ? "Save" : "Create",
 			cls: "mod-cta",
 		});
-		saveBtn.addEventListener("click", () => this.handleSave());
+		saveBtn.addEventListener("click", () => { void this.handleSave(); });
 
 		const cancelBtn = btnContainer.createEl("button", { text: "Cancel" });
 		cancelBtn.addEventListener("click", () => this.close());
@@ -159,7 +150,6 @@ export class TaskModal extends Modal {
 	private getParentCandidates(): ChronosTask[] {
 		const all = this.store.getAllTasks();
 		const editingId = this.editingTask?.id;
-		// Only epics and stories can be parents
 		return all.filter(
 			(t) =>
 				(t.type === "epic" || t.type === "story") &&

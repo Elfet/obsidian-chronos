@@ -45,22 +45,23 @@ export class GanttView extends ItemView {
 	}
 
 	getViewType(): string { return GANTT_VIEW_TYPE; }
-	getDisplayText(): string { return "Chronos Gantt"; }
+	getDisplayText(): string { return "Chronos gantt"; }
 	getIcon(): string { return "gantt-chart"; }
 
-	async onOpen(): Promise<void> {
+	onOpen(): Promise<void> {
 		this.unsubscribe = this.store.subscribe(() => {
-			// Don't re-render while dragging (we handle it ourselves)
 			if (this.isDragging) return;
 			this.saveScrollPosition();
 			this.render();
 		});
 		this.needsScrollToToday = true;
 		this.render();
+		return Promise.resolve();
 	}
 
-	async onClose(): Promise<void> {
+	onClose(): Promise<void> {
 		this.unsubscribe?.();
+		return Promise.resolve();
 	}
 
 	private saveScrollPosition(): void {
@@ -82,7 +83,7 @@ export class GanttView extends ItemView {
 		if (allGanttTasks.length === 0) {
 			const empty = container.createEl("div", { cls: "chronos-empty-state" });
 			empty.createEl("div", { text: "No tasks to display", cls: "chronos-empty-title" });
-			empty.createEl("div", { text: "Add tasks with dates in the Task List view.", cls: "chronos-empty-desc" });
+			empty.createEl("div", { text: "Add tasks with dates in the task list view.", cls: "chronos-empty-desc" });
 			return;
 		}
 
@@ -148,13 +149,8 @@ export class GanttView extends ItemView {
 				e.dataTransfer?.setData("text/plain", task.id);
 				if (e.dataTransfer) {
 					e.dataTransfer.effectAllowed = "copyMove";
-					// Use a tiny transparent image as drag ghost
 					const ghost = document.createElement("div");
-					ghost.style.width = "1px";
-					ghost.style.height = "1px";
-					ghost.style.opacity = "0";
-					ghost.style.position = "absolute";
-					ghost.style.top = "-9999px";
+					ghost.addClass("chronos-drag-ghost");
 					document.body.appendChild(ghost);
 					e.dataTransfer.setDragImage(ghost, 0, 0);
 					setTimeout(() => ghost.remove(), 0);
@@ -500,7 +496,7 @@ export class GanttView extends ItemView {
 			this.applyDrag(daysDelta);
 		};
 
-		const onMouseUp = async () => {
+		const onMouseUp = () => {
 			document.removeEventListener("mousemove", onMouseMove);
 			document.removeEventListener("mouseup", onMouseUp);
 			this.isDragging = false;
@@ -508,7 +504,7 @@ export class GanttView extends ItemView {
 			if (this.dragTask) {
 				if (this.dragTask.startDate !== this.dragOrigStart || this.dragTask.endDate !== this.dragOrigEnd) {
 					this.saveScrollPosition();
-					await this.store.updateTask(this.dragTask.id, {
+					void this.store.updateTask(this.dragTask.id, {
 						startDate: this.dragTask.startDate,
 						endDate: this.dragTask.endDate,
 					});
@@ -522,7 +518,6 @@ export class GanttView extends ItemView {
 		document.addEventListener("mouseup", onMouseUp);
 	}
 
-	/** Start drag for bar body — distinguishes click (open edit) from drag (move) */
 	private startBarDragWithClick(
 		e: MouseEvent, task: ChronosTask,
 		startDate: Date, totalDays: number, chartWidth: number,
@@ -544,13 +539,12 @@ export class GanttView extends ItemView {
 			this.applyDrag(daysDelta);
 		};
 
-		const onMouseUp = async () => {
+		const onMouseUp = () => {
 			document.removeEventListener("mousemove", onMouseMove);
 			document.removeEventListener("mouseup", onMouseUp);
 			this.isDragging = false;
 
 			if (!hasMoved) {
-				// Click — open edit modal
 				this.dragTask = null;
 				this.dragMode = null;
 				this.saveScrollPosition();
@@ -564,7 +558,7 @@ export class GanttView extends ItemView {
 			if (this.dragTask) {
 				if (this.dragTask.startDate !== this.dragOrigStart || this.dragTask.endDate !== this.dragOrigEnd) {
 					this.saveScrollPosition();
-					await this.store.updateTask(this.dragTask.id, {
+					void this.store.updateTask(this.dragTask.id, {
 						startDate: this.dragTask.startDate,
 						endDate: this.dragTask.endDate,
 					});

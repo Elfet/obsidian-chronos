@@ -49,17 +49,14 @@ export class ChronosStore {
 		return this.data.tasks.find((t) => t.id === id);
 	}
 
-	/** Get root-level tasks (epics, or orphan stories/tasks) */
 	getRootTasks(): ChronosTask[] {
 		return this.getAllTasks().filter((t) => !t.parentId);
 	}
 
-	/** Get direct children of a task */
 	getChildren(parentId: string): ChronosTask[] {
 		return this.getAllTasks().filter((t) => t.parentId === parentId);
 	}
 
-	/** Get all descendants recursively (flat list) */
 	getDescendants(parentId: string): ChronosTask[] {
 		const result: ChronosTask[] = [];
 		const children = this.getChildren(parentId);
@@ -70,7 +67,6 @@ export class ChronosStore {
 		return result;
 	}
 
-	/** Get a flat list of all tasks in tree order */
 	getTaskTree(): { task: ChronosTask; depth: number }[] {
 		const result: { task: ChronosTask; depth: number }[] = [];
 		const walk = (parentId: string | undefined, depth: number) => {
@@ -86,7 +82,6 @@ export class ChronosStore {
 		return result;
 	}
 
-	/** Get all tasks that have dates set (for Gantt) */
 	getGanttTasks(): { task: ChronosTask; depth: number }[] {
 		return this.getTaskTree().filter(
 			({ task }) => task.startDate && task.endDate
@@ -118,22 +113,19 @@ export class ChronosStore {
 		if (idx === -1) return;
 		this.data.tasks[idx] = { ...this.data.tasks[idx], ...updates };
 
-		// Auto-update progress based on children
 		const task = this.data.tasks[idx];
 		if (task.parentId) {
 			await this.recalcParentProgress(task.parentId);
-			return; // recalcParentProgress already saves
+			return;
 		}
 		await this.save();
 	}
 
 	async deleteTask(id: string): Promise<void> {
-		// Delete all descendants first
 		const descendants = this.getDescendants(id);
 		const idsToDelete = new Set([id, ...descendants.map((d) => d.id)]);
 		this.data.tasks = this.data.tasks.filter((t) => !idsToDelete.has(t.id));
 
-		// Clean up dependency references
 		for (const task of this.data.tasks) {
 			task.dependencies = task.dependencies.filter((d) => !idsToDelete.has(d));
 		}
@@ -149,7 +141,6 @@ export class ChronosStore {
 			? this.getChildren(task.parentId)
 			: this.getRootTasks();
 
-		// Reorder siblings
 		const sorted = siblings.filter((s) => s.id !== id).sort((a, b) => a.order - b.order);
 		sorted.splice(newOrder, 0, task);
 		sorted.forEach((s, i) => {
@@ -162,7 +153,6 @@ export class ChronosStore {
 
 	// --- Schedule ---
 
-	/** Get all schedule entries for a specific date */
 	getScheduleForDate(date: string): { task: ChronosTask; entry: ScheduleEntry }[] {
 		const results: { task: ChronosTask; entry: ScheduleEntry }[] = [];
 		for (const task of this.data.tasks) {
@@ -176,18 +166,18 @@ export class ChronosStore {
 		return results.sort((a, b) => a.entry.startTime.localeCompare(b.entry.startTime));
 	}
 
-	/** Add a schedule entry to a task */
 	async addScheduleEntry(taskId: string, entry: ScheduleEntry): Promise<void> {
 		const idx = this.data.tasks.findIndex((t) => t.id === taskId);
 		if (idx === -1) return;
-		if (!this.data.tasks[idx].schedule) {
-			this.data.tasks[idx].schedule = [];
+		const schedule = this.data.tasks[idx].schedule;
+		if (!schedule) {
+			this.data.tasks[idx].schedule = [entry];
+		} else {
+			schedule.push(entry);
 		}
-		this.data.tasks[idx].schedule!.push(entry);
 		await this.save();
 	}
 
-	/** Update a schedule entry (matched by date + original startTime) */
 	async updateScheduleEntry(
 		taskId: string,
 		date: string,
@@ -206,7 +196,6 @@ export class ChronosStore {
 		await this.save();
 	}
 
-	/** Remove a schedule entry */
 	async removeScheduleEntry(taskId: string, date: string, startTime: string): Promise<void> {
 		const idx = this.data.tasks.findIndex((t) => t.id === taskId);
 		if (idx === -1) return;
@@ -218,7 +207,6 @@ export class ChronosStore {
 		await this.save();
 	}
 
-	/** Recalculate parent progress from children */
 	private async recalcParentProgress(parentId: string): Promise<void> {
 		const children = this.getChildren(parentId);
 		if (children.length === 0) {
@@ -231,9 +219,9 @@ export class ChronosStore {
 		const idx = this.data.tasks.findIndex((t) => t.id === parentId);
 		if (idx !== -1) {
 			this.data.tasks[idx].progress = avgProgress;
-			// Recurse up
-			if (this.data.tasks[idx].parentId) {
-				await this.recalcParentProgress(this.data.tasks[idx].parentId!);
+			const pid = this.data.tasks[idx].parentId;
+			if (pid) {
+				await this.recalcParentProgress(pid);
 				return;
 			}
 		}
